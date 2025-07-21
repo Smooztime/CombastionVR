@@ -21,7 +21,7 @@ Shader "Custom/Refraction"
 		Tags{ "RenderType" = "Transparent"  "Queue" = "Geometry+0" "IgnoreProjector" = "True" }
 		Cull Back
 		ZTest LEqual
-		GrabPass{ "RefractionGrab1" }
+		//GrabPass{ "CustomRefractionGrab" }
 		CGINCLUDE
 		#include "UnityPBSLighting.cginc"
 		#include "Lighting.cginc"
@@ -41,7 +41,7 @@ Shader "Custom/Refraction"
 		uniform float _Metalness;
 		uniform float _Smoothness;
 		uniform float _Opacity;
-		uniform sampler2D RefractionGrab1;
+		uniform sampler2D _CameraOpaqueTexture;
 		uniform float _ChromaticAberration;
 		uniform float _IndexofRefraction;
 
@@ -62,9 +62,9 @@ Shader "Custom/Refraction"
 			float3 worldViewDir = normalize( UnityWorldSpaceViewDir( i.worldPos ) );
 			float3 refractionOffset = ( ( ( ( indexOfRefraction - 1.0 ) * mul( UNITY_MATRIX_V, float4( worldNormal, 0.0 ) ) ) * ( 1.0 / ( screenPos.z + 1.0 ) ) ) * ( 1.0 - dot( worldNormal, worldViewDir ) ) );
 			float2 cameraRefraction = float2( refractionOffset.x, -( refractionOffset.y * _ProjectionParams.x ) );
-			float4 redAlpha = tex2D( RefractionGrab1, ( projScreenPos + cameraRefraction ) );
-			float green = tex2D( RefractionGrab1, ( projScreenPos + ( cameraRefraction * ( 1.0 - chomaticAberration ) ) ) ).g;
-			float blue = tex2D( RefractionGrab1, ( projScreenPos + ( cameraRefraction * ( 1.0 + chomaticAberration ) ) ) ).b;
+			float4 redAlpha = tex2D( _CameraOpaqueTexture ( projScreenPos + cameraRefraction ) );
+			float green = tex2D( _CameraOpaqueTexture, ( projScreenPos + ( cameraRefraction * ( 1.0 - chomaticAberration ) ) ) ).g;
+			float blue = tex2D( _CameraOpaqueTexture, ( projScreenPos + ( cameraRefraction * ( 1.0 + chomaticAberration ) ) ) ).b;
 			return float4( redAlpha.r, green, blue, redAlpha.a );
 		}
 
